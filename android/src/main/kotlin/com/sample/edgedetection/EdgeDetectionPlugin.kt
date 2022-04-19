@@ -89,7 +89,12 @@ class EdgeDetectionHandler : MethodCallHandler, PluginRegistry.ActivityResultLis
             return
         }
 
+        // Parses the arguments of call as a map of String to Any
+        val args = call.arguments as Map<String, *>
+        val shouldShowGallery = args["show_gallery_picker"] as Boolean
+
         val intent = Intent(Intent(getActivity()?.applicationContext, ScanActivity::class.java))
+        intent.putExtra("show_gallery_picker", shouldShowGallery)
         getActivity()?.startActivityForResult(intent, REQUEST_CODE)
     }
 

@@ -11,6 +11,7 @@ import android.util.Log
 import android.view.Display
 import android.view.MenuItem
 import android.view.SurfaceView
+import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -37,7 +38,6 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
 
     private lateinit var mPresenter: ScanPresenter
 
-
     override fun provideContentViewId(): Int = R.layout.activity_scan
 
     override fun initPresenter() {
@@ -50,41 +50,41 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
             finish()
         }
         if (ContextCompat.checkSelfPermission(
-                        this,
-                        android.Manifest.permission.CAMERA
-                ) != PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(
-                        this,
-                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ) != PackageManager.PERMISSION_GRANTED
+                this,
+                android.Manifest.permission.CAMERA
+            ) != PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(
-                            android.Manifest.permission.CAMERA,
-                            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-                    ),
-                    REQUEST_CAMERA_PERMISSION
+                this,
+                arrayOf(
+                    android.Manifest.permission.CAMERA,
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ),
+                REQUEST_CAMERA_PERMISSION
             )
         } else if (ContextCompat.checkSelfPermission(
-                        this,
-                        android.Manifest.permission.CAMERA
-                ) != PackageManager.PERMISSION_GRANTED
+                this,
+                android.Manifest.permission.CAMERA
+            ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(android.Manifest.permission.CAMERA),
-                    REQUEST_CAMERA_PERMISSION
+                this,
+                arrayOf(android.Manifest.permission.CAMERA),
+                REQUEST_CAMERA_PERMISSION
             )
         } else if (ContextCompat.checkSelfPermission(
-                        this,
-                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ) != PackageManager.PERMISSION_GRANTED
+                this,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                    REQUEST_CAMERA_PERMISSION
+                this,
+                arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                REQUEST_CAMERA_PERMISSION
             )
         }
 
@@ -93,11 +93,17 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
                 mPresenter.shut()
             }
         }
+        val shouldShowGallery = intent.getBooleanExtra("show_gallery_picker", true)
 
-        gallery.setOnClickListener {
-            val gallery = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
-            ActivityCompat.startActivityForResult(this, gallery, 1, null);
-        };
+        if (shouldShowGallery) {
+            gallery.setOnClickListener {
+                val gallery = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
+                ActivityCompat.startActivityForResult(this, gallery, 1, null);
+            };
+        } else {
+            gallery.visibility = View.GONE
+        }
+
     }
 
 
@@ -116,9 +122,9 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
     }
 
     override fun onRequestPermissionsResult(
-            requestCode: Int,
-            permissions: Array<out String>,
-            grantResults: IntArray
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
     ) {
 
         var allGranted = false
@@ -131,7 +137,7 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
                 }
                 if (permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) >= 0) {
                     indexPermission =
-                            permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 }
                 if (indexPermission >= 0 && grantResults[indexPermission] == PackageManager.PERMISSION_GRANTED) {
                     allGranted = true
@@ -139,8 +145,8 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
             }
 
             if (grantResults.count() == 2 && (
-                            grantResults[permissions.indexOf(android.Manifest.permission.CAMERA)] == PackageManager.PERMISSION_GRANTED
-                                    && grantResults[permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)] == PackageManager.PERMISSION_GRANTED)
+                        grantResults[permissions.indexOf(android.Manifest.permission.CAMERA)] == PackageManager.PERMISSION_GRANTED
+                                && grantResults[permissions.indexOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)] == PackageManager.PERMISSION_GRANTED)
             ) {
                 allGranted = true
             }
@@ -206,8 +212,9 @@ class ScanActivity : BaseActivity(), IScanView.Proxy {
         val exif = ExifInterface(iStream);
         var rotation = -1
         val orientation: Int = exif.getAttributeInt(
-                ExifInterface.TAG_ORIENTATION,
-                ExifInterface.ORIENTATION_UNDEFINED)
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_UNDEFINED
+        )
         when (orientation) {
             ExifInterface.ORIENTATION_ROTATE_90 -> rotation = Core.ROTATE_90_CLOCKWISE
             ExifInterface.ORIENTATION_ROTATE_180 -> rotation = Core.ROTATE_180
