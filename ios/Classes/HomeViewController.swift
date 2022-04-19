@@ -7,6 +7,8 @@ class HomeViewController: UIViewController, ImageScannerControllerDelegate {
     var cameraController: ImageScannerController!
     var _result:FlutterResult?
     
+    var _showGalleryPicker = false
+    
     override func viewDidAppear(_ animated: Bool) {
         if self.isBeingPresented {
             cameraController = ImageScannerController()
@@ -47,9 +49,9 @@ class HomeViewController: UIViewController, ImageScannerControllerDelegate {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        cancelButton.isHidden = false
-        selectPhotoButton.isHidden = false
-        shutterButton.isHidden = false
+        cancelButton.isHidden = true
+        selectPhotoButton.isHidden = !_showGalleryPicker
+        shutterButton.isHidden = true
     }
     
     private lazy var shutterButton: ShutterButton = {
